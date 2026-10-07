@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Omena0/fr-docs/main/config.schema.json",
+  "project_name": "fr-chat",
+  "copyright_holder": "fr-chat contributors",
+  "project_url": "https://github.com/Omena0/chat",
+  "site_path_prefix": "/chat/",
+  "docs_dir": ".",
+  "src_dir": "src",
+  "out_dir": "site",
+  "sidebar": [
+    [
+      "Overview",
+      [
+        ["index", "Documentation Home"]
+      ]
+    ],
+    [
+      "Product",
+      [
+        ["product", "Product Overview"],
+        ["experience", "User Experience"],
+        ["requirements", "Functional Requirements"]
+      ]
+    ],
+    [
+      "Engineering",
+      [
+        ["architecture", "Architecture"],
+        ["core-contract", "Core Contract"],
+        ["quality", "Security and Acceptance"],
+        ["plan", "Implementation Plan"]
+      ]
+    ]
+  ],
+  "source_files": {
+    "search_dirs": ["parent", "docs"],
+    "patterns": ["**/*.md", "**/*.rs", "**/*.kt", "**/*.kts", "**/*.toml", "**/*.json", "**/*.yml", "**/*.yaml"],
+    "ignore_dirs": [".git", "site", "target", "node_modules"]
+  },
+  "build": {
+    "workers": 6,
+    "minify_html": true,
+    "optimize_html": true,
+    "zstd_level": 22
+  }
+}

@@ -1,0 +1,6 @@
+/docs/site/
+target
+.gradle
+.kilo
+build
+gradle

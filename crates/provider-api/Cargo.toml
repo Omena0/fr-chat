@@ -1,0 +1,12 @@
+[package]
+name = "fr-chat-provider-api"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+async-trait.workspace = true
+fr-chat-domain = { path = "../domain" }
+serde.workspace = true
+thiserror.workspace = true
+zeroize = "1"
