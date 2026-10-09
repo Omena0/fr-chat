@@ -16,6 +16,11 @@ pub use model::{
     SearchEventKey, SearchOrderBy, SearchEventFilter, SearchEventContext, SearchCriteria,
     SearchCategories, SearchResultGroup, SearchResultGroups, SearchResult,
     SearchEventContextResult, SearchUserProfile, SearchRoomEventsResult, SearchResponse,
+    VoipCallType, VoipSessionDescription, VoipSdpType, VoipIceCandidate, VoipVersion,
+    VoipInviteEventContent, VoipCandidatesEventContent,
+    VoipAnswerEventContent, VoipHangupEventContent, VoipHangupReason,
+    VoipRejectEventContent, VoipRejectReason, VoipSelectAnswerEventContent,
+    VoipNegotiateEventContent, VoipCallState, VoipCall,
 };
 pub use timeline::{
     EventPosition, MembershipChange, TimelineError, TimelineEvent, TimelinePayload,

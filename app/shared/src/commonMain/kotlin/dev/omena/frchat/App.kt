@@ -46,6 +46,27 @@ private val TextMuted = Color(0xFF9BAAA7)
 private val Mint = Color(0xFF69D5B0)
 private val Coral = Color(0xFFFF8D72)
 
+external fun frChatInit(homeserver: String, storePath: String): String
+external fun frChatBeginAuth(providerId: String, request: String): String
+external fun frChatContinueAuth(providerId: String, response: String): String
+external fun frChatAccounts(): String
+external fun frChatServers(accountRef: String): String
+external fun frChatSync(accountRef: String): String
+external fun frChatExecute(request: String): String
+external fun frChatConversations(accountRef: String): String
+external fun frChatTimeline(accountRef: String, conversationRef: String, limit: Int): String
+external fun frChatDescriptor(): String
+external fun frChatFree(ptr: Long)
+
+object FrChatNative {
+    init {
+        try {
+            System.loadLibrary("frchat_ffi")
+        } catch (_: UnsatisfiedLinkError) {
+        }
+    }
+}
+
 @Composable
 fun FrChatApp() {
     MaterialTheme(

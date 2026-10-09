@@ -2,7 +2,8 @@ use fr_chat_domain::{
     AccountRef, Capability, EntityKind, EntityRef, MessageBody, MessageRelation, OpaqueId,
     ProviderId, SpaceChildOrder,
     PushRule, PushRuleKind, Pusher, PusherKind,
-    SearchCriteria, SearchCategories, SearchResponse,
+    SearchCriteria,
+    VoipCallType, VoipSessionDescription, VoipIceCandidate, VoipHangupReason, VoipRejectReason,
 };
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -99,6 +100,42 @@ pub enum ProviderAction {
         criteria: SearchCriteria,
         next_batch: Option<String>,
     },
+    VoipInvite {
+        conversation_id: EntityRef,
+        call_id: String,
+        call_type: VoipCallType,
+        offer: VoipSessionDescription,
+        lifetime: Option<u64>,
+    },
+    VoipCandidates {
+        conversation_id: EntityRef,
+        call_id: String,
+        candidates: Vec<VoipIceCandidate>,
+    },
+    VoipAnswer {
+        conversation_id: EntityRef,
+        call_id: String,
+        answer: VoipSessionDescription,
+    },
+    VoipHangup {
+        conversation_id: EntityRef,
+        call_id: String,
+        reason: Option<VoipHangupReason>,
+    },
+    VoipReject {
+        conversation_id: EntityRef,
+        call_id: String,
+        reason: Option<VoipRejectReason>,
+    },
+    VoipSelectAnswer {
+        conversation_id: EntityRef,
+        call_id: String,
+    },
+    VoipNegotiate {
+        conversation_id: EntityRef,
+        call_id: String,
+        offer: VoipSessionDescription,
+    },
 }
 
 impl ProviderAction {
@@ -148,6 +185,13 @@ impl ProviderAction {
             Self::RemovePusher { .. } => vec![vec![Capability::PushNotifications]],
             Self::SetPusher { .. } => vec![vec![Capability::PushNotifications]],
             Self::SearchEvents { .. } => vec![vec![Capability::Search]],
+            Self::VoipInvite { .. } => vec![vec![Capability::VoipCalls, Capability::VoipSignaling]],
+            Self::VoipCandidates { .. } => vec![vec![Capability::VoipSignaling]],
+            Self::VoipAnswer { .. } => vec![vec![Capability::VoipCalls, Capability::VoipSignaling]],
+            Self::VoipHangup { .. } => vec![vec![Capability::VoipCalls, Capability::VoipSignaling]],
+            Self::VoipReject { .. } => vec![vec![Capability::VoipCalls, Capability::VoipSignaling]],
+            Self::VoipSelectAnswer { .. } => vec![vec![Capability::VoipSignaling]],
+            Self::VoipNegotiate { .. } => vec![vec![Capability::VoipCalls, Capability::VoipSignaling]],
         }
     }
 
@@ -180,6 +224,13 @@ impl ProviderAction {
             | Self::CreateSpace { parent_space_id: Some(conversation_id), .. }
             | Self::AddSpaceChild { space_id: conversation_id, .. }
             | Self::RemoveSpaceChild { space_id: conversation_id, .. } => conversation_id,
+            Self::VoipInvite { conversation_id, .. }
+            | Self::VoipCandidates { conversation_id, .. }
+            | Self::VoipAnswer { conversation_id, .. }
+            | Self::VoipHangup { conversation_id, .. }
+            | Self::VoipReject { conversation_id, .. }
+            | Self::VoipSelectAnswer { conversation_id, .. }
+            | Self::VoipNegotiate { conversation_id, .. } => conversation_id,
             Self::CreateSpace { parent_space_id: None, .. } => {
                 // For root spaces, we need a dummy conversation_id - validation will catch this
                 // This is a limitation of the current API design
@@ -283,7 +334,14 @@ impl ProviderAction {
             | Self::AddPusher { .. }
             | Self::RemovePusher { .. }
             | Self::SetPusher { .. }
-            | Self::SearchEvents { .. } => {}
+            | Self::SearchEvents { .. }
+            | Self::VoipInvite { .. }
+            | Self::VoipCandidates { .. }
+            | Self::VoipAnswer { .. }
+            | Self::VoipHangup { .. }
+            | Self::VoipReject { .. }
+            | Self::VoipSelectAnswer { .. }
+            | Self::VoipNegotiate { .. } => {}
         }
         match self {
             Self::AddReaction { key, .. } | Self::RemoveReaction { key, .. }
@@ -306,6 +364,15 @@ impl ProviderAction {
                 if pusher.pushkey.trim().is_empty() {
                     return Err(ActionValidationError::WrongEntityKind("pushkey"));
                 }
+            }
+            Self::VoipInvite { call_id, .. }
+            | Self::VoipCandidates { call_id, .. }
+            | Self::VoipAnswer { call_id, .. }
+            | Self::VoipHangup { call_id, .. }
+            | Self::VoipReject { call_id, .. }
+            | Self::VoipSelectAnswer { call_id, .. }
+            | Self::VoipNegotiate { call_id, .. } if call_id.trim().is_empty() => {
+                return Err(ActionValidationError::WrongEntityKind("call_id"));
             }
             _ => {}
         }
@@ -359,7 +426,14 @@ fn related_entities(action: &ProviderAction) -> Vec<&EntityRef> {
         | ProviderAction::JoinConversation { .. }
         | ProviderAction::LeaveConversation { .. }
         | ProviderAction::UploadMedia { .. }
-        | ProviderAction::SearchEvents { .. } => Vec::new(),
+        | ProviderAction::SearchEvents { .. }
+        | ProviderAction::VoipInvite { .. }
+        | ProviderAction::VoipCandidates { .. }
+        | ProviderAction::VoipAnswer { .. }
+        | ProviderAction::VoipHangup { .. }
+        | ProviderAction::VoipReject { .. }
+        | ProviderAction::VoipSelectAnswer { .. }
+        | ProviderAction::VoipNegotiate { .. } => Vec::new(),
     }
 }
 

@@ -14,6 +14,7 @@ matrix-sdk-sqlite = { git = "https://github.com/matrix-org/matrix-rust-sdk.git",
 mime = "0.3"
 rand = "0.8"
 ruma-client-api = { version = "0.24", features = ["client"] }
+ruma-common = "0.19"
 ruma-events = "0.34"
 serde_json.workspace = true
 tokio = { version = "1", features = ["rt"] }

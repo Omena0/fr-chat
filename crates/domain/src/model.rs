@@ -643,3 +643,163 @@ pub struct SearchRoomEventsResult {
 pub struct SearchResponse {
     pub room_events: SearchRoomEventsResult,
 }
+
+/// VoIP call events (MSC2746, MSC3401)
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum VoipCallType {
+    Voice,
+    Video,
+}
+
+/// VoIP session description (SDP)
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VoipSessionDescription {
+    pub sdp: String,
+    pub sdp_type: VoipSdpType,
+}
+
+/// SDP type
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum VoipSdpType {
+    Offer,
+    Answer,
+    Pranswer,
+    Rollback,
+}
+
+/// VoIP ICE candidate
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VoipIceCandidate {
+    pub candidate: String,
+    pub sdp_mid: String,
+    pub sdp_mline_index: u32,
+    pub username_fragment: Option<String>,
+}
+
+/// VoIP version
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum VoipVersion {
+    Version0,
+    Version1,
+    Other(String),
+}
+
+/// m.call.invite event
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VoipInviteEventContent {
+    pub call_id: String,
+    pub party_id: Option<String>,
+    pub offer: VoipSessionDescription,
+    pub lifetime: Option<u64>,
+    pub version: VoipVersion,
+    pub call_type: Option<VoipCallType>,
+}
+
+/// m.call.candidates event
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VoipCandidatesEventContent {
+    pub call_id: String,
+    pub party_id: Option<String>,
+    pub candidates: Vec<VoipIceCandidate>,
+    pub version: VoipVersion,
+}
+
+/// m.call.answer event
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VoipAnswerEventContent {
+    pub call_id: String,
+    pub party_id: Option<String>,
+    pub answer: VoipSessionDescription,
+    pub version: VoipVersion,
+}
+
+/// m.call.hangup event
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VoipHangupEventContent {
+    pub call_id: String,
+    pub party_id: Option<String>,
+    pub reason: Option<VoipHangupReason>,
+    pub version: VoipVersion,
+}
+
+/// Hangup reasons
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum VoipHangupReason {
+    UserHangup,
+    CallTimeout,
+    AnsweredElsewhere,
+    IceFailed,
+    ConnectionFailed,
+    MediaFailed,
+    Other(String),
+}
+
+/// m.call.reject event
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VoipRejectEventContent {
+    pub call_id: String,
+    pub party_id: Option<String>,
+    pub reason: Option<VoipRejectReason>,
+    pub version: VoipVersion,
+}
+
+/// Reject reasons
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum VoipRejectReason {
+    Busy,
+    Rejected,
+    CallTimeout,
+    UnsupportedCallType,
+    Other(String),
+}
+
+/// m.call.select_answer event (for glare resolution)
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VoipSelectAnswerEventContent {
+    pub call_id: String,
+    pub party_id: Option<String>,
+    pub selected_party_id: Option<String>,
+    pub version: VoipVersion,
+}
+
+/// m.call.negotiate event (renegotiation)
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VoipNegotiateEventContent {
+    pub call_id: String,
+    pub party_id: Option<String>,
+    pub offer: VoipSessionDescription,
+    pub lifetime: Option<u64>,
+    pub version: VoipVersion,
+}
+
+/// VoIP call state in the application
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum VoipCallState {
+    Invited,
+    Ringing,
+    Connected,
+    Ended,
+    Failed,
+}
+
+/// VoIP call representation
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VoipCall {
+    pub id: EntityRef,
+    pub conversation_id: EntityRef,
+    pub call_id: String,
+    pub initiator_id: EntityRef,
+    pub call_type: VoipCallType,
+    pub state: VoipCallState,
+    pub created_at_ms: i64,
+    pub ended_at_ms: Option<i64>,
+    pub offer: Option<VoipSessionDescription>,
+    pub answer: Option<VoipSessionDescription>,
+    pub candidates: Vec<VoipIceCandidate>,
+}

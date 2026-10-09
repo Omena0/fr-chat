@@ -32,6 +32,8 @@ pub enum Capability {
     Encrypt,
     Decrypt,
     VerifyIdentity,
+    VoipCalls,
+    VoipSignaling,
     Other(String),
 }
 
@@ -65,6 +67,8 @@ impl Capability {
             Self::Encrypt => "encrypt",
             Self::Decrypt => "decrypt",
             Self::VerifyIdentity => "verify_identity",
+Self::VoipCalls => "voip_calls",
+            Self::VoipSignaling => "voip_signaling",
             Self::Other(value) => value,
         }
     }

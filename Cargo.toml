@@ -5,6 +5,7 @@ members = [
     "crates/app-core",
     "crates/store-sqlite",
     "crates/provider-matrix",
+    "crates/ffi",
 ]
 resolver = "3"
 
